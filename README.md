@@ -1,6 +1,6 @@
 # Face Recognition Backend
 
-![CI](https://github.com/<YOUR_USERNAME>/<REPO_NAME>/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/YashJagdale2122/Face_Recognition/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-green)
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
@@ -166,5 +166,3 @@ This mirrors real-world ML system evolution.
 * Batch image processing
 * Async job handling
 * Authentication and rate limiting
-
--
