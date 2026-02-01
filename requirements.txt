@@ -17,3 +17,5 @@ numpy
 pillow
 python-multipart
 opencv-python-headless
+pytest
+pytest-mock
