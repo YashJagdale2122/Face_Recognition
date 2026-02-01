@@ -51,3 +51,9 @@ def test_recognize_faces_returns_expected_structure(mocker, service):
 
     assert face["name"] == "test_person"
     assert 0.0 <= face["confidence"] <= 1.0
+
+def test_distance_to_confidence(service):
+    assert service._distance_to_confidence(0.0) == 1.0
+    assert service._distance_to_confidence(0.3) == 0.5
+    assert service._distance_to_confidence(0.6) == 0.0
+    assert service._distance_to_confidence(0.8) == 0.0

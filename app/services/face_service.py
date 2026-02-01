@@ -1,6 +1,6 @@
 import os
 from typing import List, Dict
-
+import numpy as np
 import face_recognition
 
 from app.core.confidence import face_distance_to_confidence
@@ -39,11 +39,17 @@ class FaceRecognitionService:
             self.known_encodings.append(encodings[0])
             self.known_names.append(name)
 
+    def _distance_to_confidence(self, distance: float, threshold: float = 0.6) -> float:
+        """
+        Convert face distance to a normalized confidence score.
+        Lower distance = higher confidence.
+        """
+        if distance > threshold:
+            return 0.0
+        return round(1 - (distance / threshold), 2)
+
+
     def recognize_faces(self, image_path: str) -> List[Dict]:
-        """
-        Recognize faces in the given image and return
-        name, confidence, and bounding box.
-        """
         image = face_recognition.load_image_file(image_path)
         locations = face_recognition.face_locations(image)
         encodings = face_recognition.face_encodings(image, locations)
@@ -55,16 +61,16 @@ class FaceRecognitionService:
                 self.known_encodings, encoding
             )
 
-            if len(distances) == 0:
-                continue
+            best_idx = int(np.argmin(distances))
+            best_distance = distances[best_idx]
 
-            best_match_index = distances.argmin()
-            best_distance = distances[best_match_index]
-            confidence = face_distance_to_confidence(best_distance)
+            confidence = self._distance_to_confidence(best_distance)
 
-            name = "Unknown"
-            if best_distance < 0.6:
-                name = self.known_names[best_match_index]
+            name = (
+                self.known_names[best_idx]
+                if confidence > 0
+                else "Unknown"
+            )
 
             results.append({
                 "name": name,
@@ -73,7 +79,7 @@ class FaceRecognitionService:
                     "top": top,
                     "right": right,
                     "bottom": bottom,
-                    "left": left
+                    "left": left,
                 }
             })
 
