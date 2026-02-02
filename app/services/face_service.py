@@ -2,9 +2,11 @@ import os
 from typing import List, Dict
 import numpy as np
 import face_recognition
-
+from app.utils.logger import setup_logger
 from app.core.confidence import face_distance_to_confidence
 
+
+logger = setup_logger(__name__)
 
 class FaceRecognitionService:
     """
@@ -50,9 +52,14 @@ class FaceRecognitionService:
 
 
     def recognize_faces(self, image_path: str) -> List[Dict]:
+
+        logger.info("Starting face recognition process")
+
         image = face_recognition.load_image_file(image_path)
         locations = face_recognition.face_locations(image)
         encodings = face_recognition.face_encodings(image, locations)
+
+        logger.info(f"Detected {len(locations)} face(s) in image")
 
         results = []
 
@@ -82,5 +89,5 @@ class FaceRecognitionService:
                     "left": left,
                 }
             })
-
+        logger.info(f"Recognition complete. Results: {len(results)} face(s) processed")
         return results
