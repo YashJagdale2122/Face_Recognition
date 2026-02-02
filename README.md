@@ -12,7 +12,6 @@ The system detects multiple faces in an uploaded image, identifies known individ
 
 This project demonstrates how an **experimental ML script** can be evolved into a **clean backend service** using proper architecture and separation of concerns.
 
----
 
 ## Problem Statement
 
@@ -24,7 +23,6 @@ Face recognition is often demonstrated through standalone scripts, which are:
 
 This project addresses that gap by converting face recognition logic into a **service-driven backend** that can be consumed by other systems (web, mobile, analytics pipelines).
 
----
 
 ## Solution Overview
 
@@ -37,7 +35,6 @@ The backend exposes an API that:
 
 The system is structured to be **extensible**, **testable**, and **production-ready**.
 
----
 
 ## Architecture
 
@@ -61,7 +58,6 @@ face_recognition (dlib)
 * Known faces are loaded at application startup
 * No business logic inside routes
 
----
 
 ## Features
 
@@ -72,7 +68,6 @@ face_recognition (dlib)
 * Dockerized deployment
 * OpenAPI / Swagger support
 
----
 
 ## Tech Stack
 
@@ -82,7 +77,108 @@ face_recognition (dlib)
 * **Containerization**: Docker
 * **API Docs**: Swagger UI
 
----
+
+## Quick Start
+
+### Prerequisites
+
+- Docker installed (recommended)
+- Python 3.10+ (for local development without Docker)
+- Webcam or test images (optional)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/YashJagdale2122/Face_Recognition.git
+cd Face_Recognition
+```
+
+### 2. Prepare Known Faces
+
+Add reference images to the `images/` directory:
+```bash
+# Each image filename becomes the person's identity
+images/
+  ├── john.jpg      # Will be recognized as "john"
+  ├── sarah.jpg     # Will be recognized as "sarah"
+  └── alex.png      # Will be recognized as "alex"
+```
+
+**Image Requirements:**
+- Clear, front-facing photos
+- Good lighting
+- Single person per image
+- Supported formats: .jpg, .jpeg, .png
+
+### 3. Run with Docker (Recommended)
+```bash
+docker build -t face-recognition-backend .
+docker run -p 8000:8000 face-recognition-backend
+```
+
+The API will be available at:
+- **API Base**: http://localhost:8000
+- **Swagger Docs**: http://localhost:8000/docs
+
+### 4. Test the API
+
+#### Using curl:
+```bash
+# Upload an image for recognition
+curl -X POST "http://localhost:8000/recognize" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@path/to/test_image.jpg"
+```
+
+#### Using Swagger UI:
+
+1. Navigate to http://localhost:8000/docs
+2. Click on `/recognize` endpoint
+3. Click "Try it out"
+4. Upload an image file
+5. Click "Execute"
+
+#### Expected Response:
+```json
+{
+  "results": [
+    {
+      "name": "john",
+      "box": {
+        "top": 150,
+        "right": 450,
+        "bottom": 380,
+        "left": 220
+      }
+    }
+  ]
+}
+```
+
+### 5. Run Locally (Without Docker)
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 6. Stop the Service
+
+Docker:
+```bash
+docker stop <container_id>
+```
+
+Local:
+```bash
+# Press Ctrl+C in the terminal
+```
+
 
 ## API Usage
 
@@ -119,25 +215,6 @@ POST /recognize
 
 If a face is not recognized, the name is returned as `"Unknown"`.
 
----
-
-## Running Locally
-
-### Using Docker (Recommended)
-
-```bash
-docker build -t face-recognition-backend .
-docker run -p 8000:8000 face-recognition-backend
-```
-
-API available at:
-
-```
-http://localhost:8000
-http://localhost:8000/docs
-```
-
----
 
 ## Known Faces Handling
 
@@ -147,7 +224,6 @@ http://localhost:8000/docs
 
 > In production, this can be replaced with database-backed identity management.
 
----
 
 ## Project Evolution
 
@@ -157,7 +233,6 @@ http://localhost:8000/docs
 
 This mirrors real-world ML system evolution.
 
----
 
 ## Future Improvements
 
