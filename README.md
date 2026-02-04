@@ -1,4 +1,4 @@
-# Face Recognition Backend
+# Vision Processing Backend
 
 ![CI](https://github.com/YashJagdale2122/Face_Recognition/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue)
