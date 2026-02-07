@@ -1,143 +1,125 @@
 # Vision Processing Backend
-
-![CI](https://github.com/YashJagdale2122/Face_Recognition/actions/workflows/ci.yml/badge.svg)
-![Python](https://img.shields.io/badge/python-3.10+-blue)
+![CI](https://github.com/YashJagdale2122/vision-processing-backend/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-green)
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Status](https://img.shields.io/badge/Status-Actively%20Maintained-brightgreen)
 
 
-A production-oriented **Face Recognition Backend** built using **FastAPI** and the `face_recognition` library.
-The system detects multiple faces in an uploaded image, identifies known individuals, and returns structured bounding box data via a REST API.
+## Overview
 
-This project demonstrates how an **experimental ML script** can be evolved into a **clean backend service** using proper architecture and separation of concerns.
+**Vision Processing Backend** is a **backend-oriented REST service** that exposes
+computer vision capabilities through a clean API.
+
+The project demonstrates how **applied AI / ML logic (face recognition)** can be
+integrated into a **structured backend service**, with clear separation between:
+- API layer
+- Service layer
+- Vision processing logic
+
+This repository focuses on **backend design and service structure**, not on model
+training or research experimentation.
 
 
 ## Problem Statement
 
-Face recognition is often demonstrated through standalone scripts, which are:
+Applications often need to perform **vision-based analysis** (e.g. face recognition)
+while keeping the system:
+- API-driven
+- Maintainable
+- Replaceable in terms of models and algorithms
 
-* tightly coupled,
-* hard to extend,
-* unsuitable for real backend systems.
-
-This project addresses that gap by converting face recognition logic into a **service-driven backend** that can be consumed by other systems (web, mobile, analytics pipelines).
+Embedding vision logic directly inside scripts or UI layers makes systems hard to
+scale and evolve.
 
 
 ## Solution Overview
 
-The backend exposes an API that:
+This project provides a **FastAPI-based backend service** that:
+- Accepts image input via HTTP
+- Executes face recognition inside a service layer
+- Returns structured, machine-readable results
+- Keeps AI logic isolated from request handling
 
-1. Accepts an image upload
-2. Detects all faces present
-3. Matches detected faces against a known set
-4. Returns recognized names and bounding boxes as JSON
-
-The system is structured to be **extensible**, **testable**, and **production-ready**.
+The design allows the vision logic to evolve independently of the API contract.
 
 
-## Architecture
+## Architecture Overview
+
+The service follows a **simple, backend-first layered architecture**.
 
 ```text
 Client
-  │
-  ▼
-FastAPI Route
-  │
-  ▼
-FaceRecognitionService
-  │
-  ▼
-face_recognition (dlib)
+  ↓
+FastAPI API Layer
+  ↓
+Service Layer
+  ↓
+Vision Processing Logic
+````
+
+### Design Principles
+
+* **Thin API layer**: routes only validate input and format responses
+* **Service abstraction**: vision logic is not embedded in routes
+* **Replaceable AI components**: models and libraries can be swapped
+* **Clear contracts**: predictable request/response behavior
+
+
+## Core Components
+
+### API Layer
+
+* FastAPI endpoints
+* Handles HTTP requests and file uploads
+* Returns structured JSON responses
+
+### Service Layer
+
+* Orchestrates vision processing
+* Handles business logic
+* Acts as the boundary between API and AI logic
+
+### Vision Processing
+
+* Uses OpenCV and `face_recognition`
+* Performs face detection and recognition
+* Returns bounding box and identity information
+
+
+## API Usage
+
+### Base URL
+
+```
+http://localhost:8000
 ```
 
-### Key Design Decisions
+### Health Check
 
-* **Service Layer** handles all ML logic
-* **API Layer** only manages HTTP concerns
-* Known faces are loaded at application startup
-* No business logic inside routes
+**GET** `/health`
 
-
-## Features
-
-* Multi-face detection in a single image
-* Known vs unknown face classification
-* Bounding box extraction per face
-* Clean service abstraction
-* Dockerized deployment
-* OpenAPI / Swagger support
-
-
-## Tech Stack
-
-* **Backend**: FastAPI (Python 3.10+)
-* **Face Recognition**: `face_recognition` (dlib)
-* **Image Processing**: OpenCV, NumPy
-* **Containerization**: Docker
-* **API Docs**: Swagger UI
-
-
-## Quick Start
-
-### Prerequisites
-
-- Docker installed (recommended)
-- Python 3.10+ (for local development without Docker)
-- Webcam or test images (optional)
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/YashJagdale2122/Face_Recognition.git
-cd Face_Recognition
+```json
+{
+  "status": "ok"
+}
 ```
 
-### 2. Prepare Known Faces
 
-Add reference images to the `images/` directory:
+## API Examples
+
+### Recognize Faces (Image Upload)
+
+**Request**
+
 ```bash
-# Each image filename becomes the person's identity
-images/
-  ├── john.jpg      # Will be recognized as "john"
-  ├── sarah.jpg     # Will be recognized as "sarah"
-  └── alex.png      # Will be recognized as "alex"
-```
-
-**Image Requirements:**
-- Clear, front-facing photos
-- Good lighting
-- Single person per image
-- Supported formats: .jpg, .jpeg, .png
-
-### 3. Run with Docker (Recommended)
-```bash
-docker build -t face-recognition-backend .
-docker run -p 8000:8000 face-recognition-backend
-```
-
-The API will be available at:
-- **API Base**: http://localhost:8000
-- **Swagger Docs**: http://localhost:8000/docs
-
-### 4. Test the API
-
-#### Using curl:
-```bash
-# Upload an image for recognition
 curl -X POST "http://localhost:8000/recognize" \
   -H "Content-Type: multipart/form-data" \
-  -F "file=@path/to/test_image.jpg"
+  -F "file=@person.jpg"
 ```
 
-#### Using Swagger UI:
+**Successful Response**
 
-1. Navigate to http://localhost:8000/docs
-2. Click on `/recognize` endpoint
-3. Click "Try it out"
-4. Upload an image file
-5. Click "Execute"
-
-#### Expected Response:
 ```json
 {
   "results": [
@@ -154,90 +136,88 @@ curl -X POST "http://localhost:8000/recognize" \
 }
 ```
 
-### 5. Run Locally (Without Docker)
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the application
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### 6. Stop the Service
-
-Docker:
-```bash
-docker stop <container_id>
-```
-
-Local:
-```bash
-# Press Ctrl+C in the terminal
-```
-
-
-## API Usage
-
-### Recognize Faces
-
-**Endpoint**
-
-```http
-POST /recognize
-```
-
-**Request**
-
-* Multipart form upload
-* Field: `file` (image)
-
-**Response**
+**Unknown Face Response**
 
 ```json
 {
   "results": [
     {
-      "name": "amir",
+      "name": "Unknown",
       "box": {
-        "top": 206,
-        "right": 1133,
-        "bottom": 527,
-        "left": 812
+        "top": 210,
+        "right": 390,
+        "bottom": 420,
+        "left": 180
       }
     }
   ]
 }
 ```
 
-If a face is not recognized, the name is returned as `"Unknown"`.
+**Notes**
+
+* Multiple faces in a single image are supported
+* Bounding boxes are returned in pixel coordinates
+* Vision logic is executed inside the service layer, not the API routes
 
 
-## Known Faces Handling
+## Tech Stack
 
-* Known identities are loaded from an `images/` directory at startup
-* Image filenames are used as identity labels (e.g. `amir.jpg → amir`)
-* This keeps the initial system simple and transparent
+* **Backend Framework**: FastAPI
+* **Language**: Python 3.12
+* **Computer Vision**: OpenCV, face_recognition
+* **Server**: Uvicorn
+* **Containerization**: Docker
 
-> In production, this can be replaced with database-backed identity management.
+
+## Running Locally
+
+### Prerequisites
+
+* Python 3.12+
+* Docker (optional)
+
+### Run without Docker
+
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### Run with Docker
+
+```bash
+docker build -t vision-processing-backend .
+docker run -p 8000:8000 vision-processing-backend
+```
 
 
-## Project Evolution
+## Scope & Limitations
 
-* **Phase 1**: Standalone face recognition script (experimental)
-* **Phase 2**: Service abstraction and backend architecture
-* **Phase 3**: Dockerized API with clean separation of concerns
+This project intentionally does **not** include:
 
-This mirrors real-world ML system evolution.
+* Asynchronous job queues
+* Persistent storage
+* Authentication or authorization
+* Distributed workers
+
+Those concerns are explored in other backend-focused repositories.
+
+
+## Why This Repo Exists
+
+This repository exists to demonstrate:
+
+* How AI/ML logic fits inside backend services
+* Clean separation between API and processing logic
+* Practical backend application of computer vision
+
+It complements larger, system-level backend projects in this profile.
 
 
 ## Future Improvements
 
-* Database-backed identity storage
-* Confidence scoring for matches
-* Batch image processing
-* Async job handling
-* Authentication and rate limiting
+* Async job execution for large images
+* Model abstraction layer
+* Result persistence
+* Authentication
